@@ -2,8 +2,7 @@ package com.linktegration.smartservices;
 
 import com.linktegration.smartservices.util.RequestNotFinishedException;
 
-public interface Request<T> {
-	
+public interface RequestInfo<T> {
 	/**
 	 * 
 	 * Note: This may not be the same Service instance that returned the request
@@ -26,10 +25,10 @@ public interface Request<T> {
 	 * @return
 	 */
 	public long getEndTime() throws RequestNotFinishedException;
-	
+
 	/**
-	 * time since the request started.
-	 * when the request finishes, this will indicate the duration.
+	 * time since the request started. when the request finishes, this will
+	 * indicate the duration.
 	 * 
 	 * @return
 	 */

@@ -106,21 +106,17 @@ abstract public class Service<T> {
 		return requests;
 	}
 
-	final protected ServiceManager getManager() {
-		return null;
-	}
-
 	final public InteractiveRequest<T> interactiveRequest() {
-		return new InteractiveRequestImpl<T>(request());
+		InteractiveRequest<T> ir = new InteractiveRequest<T>();
+		SimpleRequest<T> req = createRequest(null, ir);
+		// we need this references before any service executes
+		req.attachInteractiveRequest(ir);
+		ir.setup(req);
+		return ir;
 	}
 
-	// creates and sends a request to the service
-	// can only be called once. will throw an error otherwise
-	final public SimpleRequest<T> request() {
-		return request(null);
-	}
-
-	final public SimpleRequest<T> request(RequestOptions opts) {
+	private SimpleRequest<T> createRequest(RequestOptions opts,
+			InteractiveRequest<T> ir) {
 		if (opts == null)
 			opts = RequestOptions.getDefault();
 		// get consumer ( the service that invoked us )
@@ -129,7 +125,7 @@ abstract public class Service<T> {
 		if (this.future != null) {
 			// this means we are not a proxy
 			// and that we are already executing
-			return new RequestImpl<T>(consumer, this, null);
+			return new SimpleRequest<T>(consumer, this, null);
 		}
 		if (isGlobal()) {
 			// see if there is an equivalent service instance running
@@ -140,15 +136,27 @@ abstract public class Service<T> {
 				// we know it is of the same type if the identities match
 				@SuppressWarnings("unchecked")
 				Service<T> serv = (Service<T>) equivalentService;
-				return new RequestImpl<T>(consumer, serv, null);
+				return new SimpleRequest<T>(consumer, serv, null);
 			}
 		}
 		// we are not a proxy and we are not cached. we must execute
-		SimpleRequest<T> req = new RequestImpl<T>(consumer, this, null);
+		SimpleRequest<T> req = new SimpleRequest<T>(consumer, this, null);
 		this.setInitiatingRequest(req); // MUST be set before running ( to allow
 										// interaction )
+		if (ir != null)
+			req.attachInteractiveRequest(ir);
 		this.future = this.runInOwnThread();
 		return req;
+	}
+
+	// creates and sends a request to the service
+	// can only be called once. will throw an error otherwise
+	final public SimpleRequest<T> request() {
+		return request(null);
+	}
+
+	final public SimpleRequest<T> request(RequestOptions opts) {
+		return createRequest(opts, null);
 	}
 
 	private Future<T> runInOwnThread() {
@@ -211,6 +219,7 @@ abstract public class Service<T> {
 		SimpleRequest<?> req;
 		Service<?> srv = this;
 		while (true) { // loop until we don't find a consumer
+
 			req = srv.getInitiatingRequest();
 			srv = req.getConsumer();
 			if (srv == null)
