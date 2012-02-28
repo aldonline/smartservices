@@ -23,7 +23,7 @@ public class SimpleRequest<T> implements RequestInfo<T>, Future<T> {
 
 	private InteractiveRequest<T> interactiveRequest = null;
 
-	protected SimpleRequest(Service<?> consumer, Service<T> targetService,
+	SimpleRequest(Service<?> consumer, Service<T> targetService,
 			RequestOptions options) {
 		this.consumer = consumer;
 		this.targetService = targetService;

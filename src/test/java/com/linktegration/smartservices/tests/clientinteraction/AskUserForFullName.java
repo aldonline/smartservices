@@ -5,9 +5,9 @@ import org.apache.commons.logging.LogFactory;
 
 import com.linktegration.smartservices.Service;
 
-public class InteractiveService extends Service<String> {
+public class AskUserForFullName extends Service<String> {
 	
-	private Log log = LogFactory.getLog(InteractiveService.class);		
+	private Log log = LogFactory.getLog(AskUserForFullName.class);		
 	
 	@Override
 	protected String execute() throws Exception {

@@ -15,8 +15,8 @@ public class InteractiveRequest<T> implements RequestInfo<T> {
 	// we wrap a SimpleRequest ( composition pattern )
 	private SimpleRequest<T> request;
 
-	SimpleFuture<InteractiveResponse<T>> firstFuture;
-	InteractiveResponse<T> currentResponse;
+	private SimpleFuture<InteractiveResponse<T>> firstFuture;
+	private InteractiveResponse<T> currentResponse;
 
 	private Object answer = null;
 	private boolean answered = false;
@@ -37,6 +37,10 @@ public class InteractiveRequest<T> implements RequestInfo<T> {
 		this.currentResponse = res;
 	}
 
+	/**
+	 * Called by the Service class that is creating this instance
+	 * @param request
+	 */
 	void setup(SimpleRequest<T> request) {
 		this.request = request;
 		// create a reference we can access from within another thread
@@ -57,24 +61,36 @@ public class InteractiveRequest<T> implements RequestInfo<T> {
 		}).start();
 	}
 
+	/**
+	 * Once you get a handle on this request, call this to get a Future
+	 * that will in turn provide you with the first InteractiveResponse.
+	 * 
+	 * @return
+	 */
 	public Future<InteractiveResponse<T>> getFirst() {
 		return this.firstFuture;
 	}
 
 	/**
-	 * Called by the client
+	 * Called internally by the current InteractiveResponse
 	 * 
+	 * @param o
 	 */
-	public void answer(Object o) {
+	void answer(Object o) {
 		log.debug("answer( " + o + " )");
 		this.answer = o;
 		this.answered = true;
 	}
 
+
 	/**
-	 * Called by a service
+	 * When code inside Service.execute() calls interact(message),
+	 * we end up receiving ask(message) here.
+	 * 
+	 * @param message
+	 * @return
 	 */
-	public Object ask(Object message) {
+	Object ask(Object message) {
 		// we are in the service that is asking
 		log.debug("ask( " + message + " )");
 		InteractiveResponse<T> res = new InteractiveResponse<T>(this, false,
