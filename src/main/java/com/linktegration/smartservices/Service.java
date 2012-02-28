@@ -20,7 +20,7 @@ abstract public class Service<T> {
 	private Future<T> future;
 	private Set<SimpleRequest<T>> requests = new HashSet<SimpleRequest<T>>();
 
-	protected Thread workerThread;
+	private Thread workerThread;
 
 	private SimpleRequest<T> initiatingRequest;
 

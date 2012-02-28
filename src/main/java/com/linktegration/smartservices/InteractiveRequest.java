@@ -10,8 +10,8 @@ import com.linktegration.smartservices.util.SimpleFuture;
 
 public class InteractiveRequest<T> implements RequestInfo<T> {
 
-	private Log log = LogFactory.getLog(InteractiveRequest.class);		
-	
+	private Log log = LogFactory.getLog(InteractiveRequest.class);
+
 	// we wrap a SimpleRequest ( composition pattern )
 	private SimpleRequest<T> request;
 
@@ -39,6 +39,7 @@ public class InteractiveRequest<T> implements RequestInfo<T> {
 
 	/**
 	 * Called by the Service class that is creating this instance
+	 * 
 	 * @param request
 	 */
 	void setup(SimpleRequest<T> request) {
@@ -50,10 +51,9 @@ public class InteractiveRequest<T> implements RequestInfo<T> {
 				try {
 					// we wait for the service to finish
 					T value = self.request.getTargetService().getFuture().get();
-					// and we create the final InteractiveResponse
-					InteractiveResponse<T> res = new InteractiveResponse<T>(
-							self, true, null, value);
-					self.dispatchResponse(res);
+					// and we send the final InteractiveResponse
+					self.dispatchResponse(new InteractiveResponse<T>(self,
+							true, null, value));
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -62,8 +62,8 @@ public class InteractiveRequest<T> implements RequestInfo<T> {
 	}
 
 	/**
-	 * Once you get a handle on this request, call this to get a Future
-	 * that will in turn provide you with the first InteractiveResponse.
+	 * Once you get a handle on this request, call this to get a Future that
+	 * will in turn provide you with the first InteractiveResponse.
 	 * 
 	 * @return
 	 */
@@ -82,10 +82,9 @@ public class InteractiveRequest<T> implements RequestInfo<T> {
 		this.answered = true;
 	}
 
-
 	/**
-	 * When code inside Service.execute() calls interact(message),
-	 * we end up receiving ask(message) here.
+	 * When code inside Service.execute() calls interact(message), we end up
+	 * receiving ask(message) here.
 	 * 
 	 * @param message
 	 * @return
@@ -93,14 +92,13 @@ public class InteractiveRequest<T> implements RequestInfo<T> {
 	Object ask(Object message) {
 		// we are in the service that is asking
 		log.debug("ask( " + message + " )");
-		InteractiveResponse<T> res = new InteractiveResponse<T>(this, false,
-				message, null);
 		// reset the state so we can wait for an answer
 		this.answer = null;
 		this.answered = false;
 		// and now we resume the client thread
 		log.debug("ask() we will now send a response to the client with the message so it can answer. in the meantime we wait");
-		this.dispatchResponse(res);
+		this.dispatchResponse(new InteractiveResponse<T>(this, false, message,
+				null));
 		while (this.answered == false) {
 			try {
 				Thread.sleep(100);
