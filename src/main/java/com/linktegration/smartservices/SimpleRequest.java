@@ -92,11 +92,11 @@ public class SimpleRequest<T> implements RequestInfo<T>, Future<T> {
 		return 0;
 	}
 
-	public void attachInteractiveRequest(InteractiveRequest<T> req) {
+	void attachInteractiveRequest(InteractiveRequest<T> req) {
 		interactiveRequest = req;
 	}
 
-	public InteractiveRequest<T> getAttachedInteractiveRequest() {
+	InteractiveRequest<T> getAttachedInteractiveRequest() {
 		return interactiveRequest;
 	}
 
